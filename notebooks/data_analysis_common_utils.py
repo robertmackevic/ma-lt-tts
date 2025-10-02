@@ -3,7 +3,11 @@ from statistics import mean, median, stdev
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from src.text.cleaners import filter_punctuations
+from src.text.cleaners import filter_punctuations, remove_stress_marks
+
+
+def _filter_text(text: str) -> str:
+    return filter_punctuations(remove_stress_marks(text))
 
 
 def summarize_duration(_df: pd.DataFrame) -> None:
@@ -20,8 +24,8 @@ def summarize_duration(_df: pd.DataFrame) -> None:
 
 
 def summarize_sentences(_df: pd.DataFrame) -> None:
-    words = [word for text in _df["sentence"] for word in filter_punctuations(text).split()]
-    word_counts_per_text = [len(filter_punctuations(text).split()) for text in _df["sentence"]]
+    words = [word for text in _df["sentence"] for word in _filter_text(text).split()]
+    word_counts_per_text = [len(_filter_text(text).split()) for text in _df["sentence"]]
     character_counts_per_text = [len(text) for text in _df["sentence"]]
     character_counts_per_word = [len(word) for word in words]
     kwargs = {
