@@ -1,23 +1,39 @@
-def lowercase(text: str) -> str:
-    return text.lower()
+import re
+
+from src.text.symbols import ACCENTS
+
+
+def remove_stress_marks(text: str) -> str:
+    return re.sub(rf"[{re.escape(ACCENTS)}]", "", text)
 
 
 def collapse_whitespace(text: str) -> str:
-    return text.replace(' ', '')
+    return text.replace(" ", "")
 
 
-def clean_oov_symbols(text: str) -> str:
+def normalize_text(text: str) -> str:
     return (
-        text
-        .replace('„', '"')
-        .replace('“', '"')
-        .replace("–", "-")
+        re.sub(r"\s+", " ", re.sub(r"[‐‑–—―]", "-", text))
+        .replace("…", "...")
+        .replace("\ufeff", "")
+        .replace("'", "")
+        .replace("̇", "")
+        .replace("„", "\"")
+        .replace("“", "\"")
+        .strip()
+        .lower()
     )
 
 
-def basic_cleaners(text: str) -> str:
-    text = lowercase(text)
-    text = collapse_whitespace(text)
-    text = clean_oov_symbols(text)
+def filter_punctuations(text: str) -> str:
+    return normalize_text("".join(
+        character
+        if character.isalpha() or character.isspace()
+        else " " for character in text
+    ))
 
+
+def basic_cleaners(text: str) -> str:
+    text = normalize_text(text)
+    text = collapse_whitespace(text)
     return text
