@@ -118,9 +118,18 @@ def run(rank: int, n_gpus: int, params: Params, model_dir: Path, args):
     net_d = DistributedDataParallel(module=net_d, device_ids=[rank])
 
     try:
-        _, epoch_str = load_checkpoint(latest_checkpoint_path(model_dir, 'G_*.pth'), net_g, optim_g)
-        _, epoch_str = load_checkpoint(latest_checkpoint_path(model_dir, 'D_*.pth'), net_d, optim_d)
-        global_step = (epoch_str - 1) * len(train_loader)
+        if params.model.base_g or params.model.base_d:
+            print('Loading base models...')
+            load_checkpoint(params.model.base_g, net_g, allow_partial_embeddings=True)
+            load_checkpoint(params.model.base_d, net_d, allow_partial_embeddings=True)
+            epoch_str = 1
+            global_step = 0
+
+        else:
+            _, epoch_str = load_checkpoint(latest_checkpoint_path(model_dir, 'G_*.pth'), net_g, optim_g)
+            _, epoch_str = load_checkpoint(latest_checkpoint_path(model_dir, 'D_*.pth'), net_d, optim_d)
+            global_step = (epoch_str - 1) * len(train_loader)
+
     except IndexError:
         epoch_str = 1
         global_step = 0

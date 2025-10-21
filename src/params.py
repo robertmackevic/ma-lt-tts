@@ -39,6 +39,8 @@ class DataParams(BaseModel):
 
 
 class ModelParams(BaseModel):
+    base_g: Optional[Path] = None
+    base_d: Optional[Path] = None
     inter_channels: int
     hidden_channels: int
     filter_channels: int
