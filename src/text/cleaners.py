@@ -7,12 +7,8 @@ def remove_stress_marks(text: str) -> str:
     return re.sub(rf"[{re.escape(ACCENTS)}]", "", text)
 
 
-def collapse_whitespace(text: str) -> str:
-    return text.replace(" ", "")
-
-
-def normalize_text(text: str) -> str:
-    return (
+def normalize_text(text: str, lower: bool = True) -> str:
+    text = (
         re.sub(r"\s+", " ", re.sub(r"[‐‑–—―]", "-", text))
         .replace("…", "...")
         .replace("\ufeff", "")
@@ -21,19 +17,19 @@ def normalize_text(text: str) -> str:
         .replace("„", "\"")
         .replace("“", "\"")
         .strip()
-        .lower()
     )
+
+    return text.lower() if lower else text
 
 
 def filter_punctuations(text: str) -> str:
     return normalize_text("".join(
         character
-        if character.isalpha() or character.isspace()
+        if character.isalpha() or character.isspace() or character in ACCENTS
         else " " for character in text
     ))
 
 
 def basic_cleaners(text: str) -> str:
     text = normalize_text(text)
-    text = collapse_whitespace(text)
     return text
