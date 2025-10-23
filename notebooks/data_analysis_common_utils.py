@@ -23,7 +23,6 @@ def phonemize_series(
     Batch-phonemizes a Pandas Series of texts using phonemizer.
 
     - language="lt" (Lithuanian)
-    - backend="espeak" (or "espeak-mbrola")
     - phone_sep controls the separator between phonemes
     - word_sep controls the separator between words
     """
@@ -38,10 +37,30 @@ def phonemize_series(
         strip=True,
         njobs=njobs,
         preserve_punctuation=preserve_punctuation,
-        # Choose how results are joined:
         separator=Separator(phone=phone_sep, syllable="", word=word_sep),
     )
     return pd.Series(phonemes, index=series.index)
+
+
+def phonemize_text(
+        text: str,
+        language: str = "lt",
+        backend: str = "espeak",
+        phone_sep: str = "",
+        word_sep: str = " ",
+        preserve_punctuation: bool = True
+) -> str:
+    phonemes = phonemize(
+        [text],
+        language=language,
+        backend=backend,
+        strip=True,
+        njobs=1,
+        preserve_punctuation=preserve_punctuation,
+        separator=Separator(phone=phone_sep, syllable="", word=word_sep),
+    )[0]
+
+    return phonemes
 
 
 def _filter_text(text: str) -> str:
