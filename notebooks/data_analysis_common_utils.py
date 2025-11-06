@@ -1,13 +1,31 @@
 import os
+import random
 from pathlib import Path
 from statistics import mean, median, stdev
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import torch
 from phonemizer import phonemize
 from phonemizer.separator import Separator
 
+from src.model import commons
 from src.text.cleaners import filter_punctuations, remove_stress_marks
+from src.text.convert import text_to_sequence
+
+
+def preprocess_text_for_synthesis(
+        text: str,
+        text_cleaners: list[str],
+        language: str,
+        phonemized: bool,
+        stressed: bool
+) -> torch.LongTensor:
+    text_norm = text_to_sequence(text, text_cleaners, language, phonemized, stressed)
+    text_norm = commons.intersperse(text_norm, 0)
+    text_norm = torch.LongTensor(text_norm)
+    return text_norm
 
 
 def phonemize_series(
@@ -65,6 +83,16 @@ def phonemize_text(
 
 def _filter_text(text: str) -> str:
     return filter_punctuations(remove_stress_marks(text))
+
+
+def seed_everything(seed: int) -> None:
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 def load_filelist_as_df(filelist_path: str | Path) -> pd.DataFrame:
