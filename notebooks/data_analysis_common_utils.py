@@ -104,15 +104,23 @@ def load_filelist_as_df(filelist_path: str | Path) -> pd.DataFrame:
 
 
 def summarize_duration(_df: pd.DataFrame) -> None:
-    desc = _df["duration[s]"].describe(percentiles=[0.05, 0.25, 0.5, 0.75, 0.95])
+    durations = _df["duration[s]"]
+
+    desc = durations.describe(percentiles=[0.05, 0.25, 0.5, 0.75, 0.95])
+
     plt.figure(figsize=(8, 5))
-    plt.hist(_df["duration[s]"], bins=50, color="lightgray", edgecolor="black")
+    plt.hist(durations, bins=50, color="lightgray", edgecolor="black")
     plt.xlabel("Duration (s)")
     plt.ylabel("Count")
     plt.title("Distribution of Clip Durations")
     plt.show()
+
+    total_seconds = durations.sum()
+    total_hours = total_seconds / 3600
+
     print("Summary statistics for duration[s]:")
     print(desc)
+    print(f"Total duration: {total_seconds:.2f} seconds ({total_hours:.2f} hours)")
 
 
 def summarize_sentences(_df: pd.DataFrame) -> None:
